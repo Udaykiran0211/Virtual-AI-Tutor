@@ -81,8 +81,9 @@ def create_app(config_class=Config):
 
     return app
 
+app = create_app()
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    app = create_app()
-    with app.app_context():
-        db.create_all()
     app.run(debug=True)
