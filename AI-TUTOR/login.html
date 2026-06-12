@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-TUTOR | Sign In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="static/css/style.css">
+    <style>
+        body {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .logo-small {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            text-decoration: none;
+            color: white;
+            margin-bottom: 2rem;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.5rem;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2.5rem;
+            text-align: center;
+            font-size: 0.95rem;
+        }
+
+        .footer-link {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .footer-link a {
+            color: var(--primary-purple);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .footer-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body class="animate-fade">
+    <div class="auth-card glass-card">
+        <a href="index.html" class="logo-small">
+            <div class="logo-icon">A</div>
+            <span class="logo-text">AI-TUTOR</span>
+        </a>
+
+        <h1 class="title">Sign In</h1>
+        <p class="subtitle">Welcome back, future architect.</p>
+
+        <form action="login" method="POST" id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+        </form>
+
+        <p class="footer-link">
+            Don't have an account? <a href="signup.html">Create one</a>
+        </p>
+    </div>
+
+    <script src="static/js/api-client.js?v=1.1"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+
+            // Local Bypass for Static Hosting (Live Server)
+            const isLocalStatic = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+            const isLiveServer = window.location.port !== '5000' && window.location.port !== '';
+
+            try {
+                // Check heartbeat first to see if backend is responsive
+                const isBackendUp = await fetch(apiClient.baseUrl + '/api/heartbeat').then(r => r.ok).catch(() => false);
+
+                if (isLocalStatic && isLiveServer && !isBackendUp) {
+                    console.log('[Auth] Backend disconnected. Using local bypass for static host.');
+                    localStorage.setItem('user', JSON.stringify({ name: data.username || 'Student', id: 1 }));
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+
+                const response = await apiClient.request('/login', {
+                    method: 'POST',
+                    body: JSON.stringify(data)
+                });
+
+                if (response && response.status === 'success') {
+                    window.location.href = response.redirect || 'dashboard.html';
+                } else {
+                    alert(response.message || 'Login failed');
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                if (isLocalStatic && isLiveServer) {
+                    console.log('[Auth] Connection failure. Redirecting to dashboard (Static Mode).');
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert('Could not connect to the backend. Is python app.py running?');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

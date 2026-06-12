@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-TUTOR | Intelligent Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="static/css/style.css">
+    <style>
+        .hero {
+            padding: 8rem 0;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.6rem 1.5rem;
+            background: rgba(108, 93, 211, 0.1);
+            border: 1px solid rgba(108, 93, 211, 0.2);
+            border-radius: 100px;
+            color: var(--primary-purple);
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 2rem;
+        }
+
+        .hero h1 {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 2rem;
+            letter-spacing: -2px;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff4b4b;
+            box-shadow: 0 0 10px #ff4b4b;
+        }
+
+        .dot.online {
+            background: #4caf50;
+            box-shadow: 0 0 10px #4caf50;
+        }
+    </style>
+</head>
+
+<body class="animate-fade">
+    <header class="site-header">
+        <div class="header-container">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">A</div>
+                <span>AI-TUTOR</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html" class="active">Home</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="signup.html" class="btn btn-primary" style="padding: 0.6rem 1.5rem;">Get Started</a></li>
+                <li>
+                    <div class="status-pill">
+                        <div id="api-status" class="dot"></div>
+                        <span>System Status</span>
+                    </div>
+                </li>
+            </ul>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <section class="hero">
+            <div class="hero-badge">The Future of Education</div>
+            <h1>Master Any Skill with <span class="gradient-text">AI-TUTOR</span></h1>
+            <p>Experience personalized learning powered by the latest AI models. Structured roadmaps, real-time
+                tutoring, and curated content at your fingertips.</p>
+            <div class="cta-group">
+                <a href="signup.html" class="btn btn-primary" style="padding: 1.2rem 3rem; font-size: 1.1rem;">Start
+                    Your Journey</a>
+                <a href="login.html" class="btn btn-glass" style="padding: 1.2rem 3rem; font-size: 1.1rem;">View
+                    Demo</a>
+            </div>
+        </section>
+    </div>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="index.html" class="logo">
+                        <div class="logo-icon">A</div>
+                        <span>AI-TUTOR</span>
+                    </a>
+                    <p>Experience personalized learning powered by the latest AI models. Interactive roadmaps, automated assessments, and live tutor feedback at your fingertips.</p>
+                    <div class="footer-socials">
+                        <a href="#" class="footer-social-link" aria-label="Twitter">🐦</a>
+                        <a href="#" class="footer-social-link" aria-label="GitHub">💻</a>
+                        <a href="#" class="footer-social-link" aria-label="Discord">💬</a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="tutor.html?lang=python">Python Roadmap</a></li>
+                        <li><a href="tutor.html?lang=java">Java Roadmap</a></li>
+                        <li><a href="tutor.html?lang=cpp">C++ Engineering</a></li>
+                        <li><a href="#">Interactive Sandbox</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Platform</h4>
+                    <ul class="footer-links">
+                        <li><a href="dashboard.html">Dashboard</a></li>
+                        <li><a href="profile.html">Leaderboard</a></li>
+                        <li><a href="profile.html">My Badges</a></li>
+                        <li><a href="messages.html">Connections</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col footer-newsletter">
+                    <h4>Newsletter</h4>
+                    <p>Receive weekly insights, curated tutorial summaries, and latest roadmap updates directly to your inbox.</p>
+                    <form class="newsletter-form" onsubmit="event.preventDefault(); alert('Subscribed successfully!'); this.reset();">
+                        <input type="email" placeholder="Enter your email" required>
+                        <button type="submit" class="btn btn-primary">Join</button>
+                    </form>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 AI-TUTOR. All rights reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="#">Cookie Settings</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="static/js/api-client.js?v=1.1"></script>
+    <script>
+        // Check API status using the resilient client
+        async function checkStatus() {
+            const dot = document.getElementById('api-status');
+            try {
+                // apiClient is already initialized in api-client.js
+                const data = await apiClient.request('/api/heartbeat');
+                if (data && data.status === 'ok') {
+                    dot.classList.add('online');
+                }
+            } catch (e) {
+                console.log("System offline - using local mode");
+            }
+        }
+        
+        // Listen for status changes from the client
+        apiClient.onStatusChange((status) => {
+            const dot = document.getElementById('api-status');
+            const text = dot.nextElementSibling;
+            
+            if (status === 'connected') {
+                dot.classList.add('online');
+                dot.style.background = '#4caf50';
+                text.innerText = 'Live Backend Connected';
+            } else if (apiClient.isStaticBypass) {
+                dot.classList.add('online');
+                dot.style.background = '#00dfd8'; // Blue-ish for static
+                text.innerText = 'Static Mode Active';
+            } else {
+                dot.classList.remove('online');
+                text.innerText = 'System Offline';
+            }
+        });
+
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        
+        if (mobileMenuBtn && navLinks) {
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenuBtn.classList.toggle('active');
+                navLinks.classList.toggle('active');
+            });
+            
+            // Close mobile menu when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!mobileMenuBtn.contains(e.target) && !navLinks.contains(e.target)) {
+                    mobileMenuBtn.classList.remove('active');
+                    navLinks.classList.remove('active');
+                }
+            });
+        }
+
+        checkStatus();
+    </script>
+</body>
+
+</html>

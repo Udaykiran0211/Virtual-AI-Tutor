@@ -1,0 +1,17 @@
+# Credentials
+.env
+
+# Database
+instance/
+database.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+
+# IDEs
+.vscode/
+.idea/

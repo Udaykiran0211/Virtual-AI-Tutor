@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-TUTOR | Learning Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        // Dynamic path prefix resolver to support both nested Flask routes and Live Server subfolders
+        (function() {
+            const isLiveServer = window.location.port !== '5000' && window.location.port !== '';
+            const prefix = isLiveServer ? '' : '/';
+            
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = prefix + 'static/css/style.css';
+            document.head.appendChild(link);
+        })();
+    </script>
+
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: 320px;
+            padding: 2.5rem 1.5rem;
+            overflow-y: auto;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .roadmap-header {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .level-group {
+            margin-bottom: 2.5rem;
+        }
+
+        .level-title {
+            color: var(--primary-purple);
+            font-size: 0.70rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 1.2rem;
+            display: block;
+        }
+
+        .node-card {
+            padding: 1.3rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+
+        .node-card:hover,
+        .node-card.active {
+            border-color: var(--primary-purple);
+            background: rgba(108, 93, 211, 0.1);
+        }
+
+        .node-card h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .node-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Main Content area */
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .top-nav {
+            padding: 1.5rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .main-content {
+            padding: 3rem 4rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 3rem;
+        }
+
+        .header-left .current-level-tag {
+            background: rgba(108, 93, 211, 0.1);
+            color: var(--primary-purple);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+            display: inline-block;
+        }
+
+        .header-left h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 0.6rem;
+            letter-spacing: -1.5px;
+        }
+
+        .header-left p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Video Area */
+        .video-wrapper {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            min-height: 400px; /* Stabilization */
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 24px;
+            overflow: hidden;
+            margin-bottom: 3rem;
+            border: 1px solid var(--glass-border);
+            transform: translateZ(0);
+        }
+
+        /* Tabs area */
+        .tabs-header {
+            display: flex;
+            gap: 3rem;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 2.5rem;
+        }
+
+        .tab-btn {
+            padding: 1.2rem 0;
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.95rem;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover,
+        .tab-btn.active {
+            color: var(--primary-purple);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--primary-purple);
+            border-radius: 10px 10px 0 0;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Workspace Style */
+        #user-notes-editor {
+            width: 100%;
+            height: 450px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2.5rem;
+            color: white;
+            font-size: 1.05rem;
+            line-height: 1.7;
+            resize: none;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #user-notes-editor:focus {
+            border-color: var(--primary-purple);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        /* Chat Sidebar Style */
+        .chat-sidebar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 420px;
+            height: 100vh;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            transform: translateX(100%); /* Use transform instead of right */
+            background: rgba(11, 14, 20, 0.8);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid var(--glass-border);
+            will-change: transform;
+        }
+
+        .chat-sidebar.open {
+            transform: translateX(0);
+        }
+
+        .chat-header {
+            padding: 1.8rem;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 1rem 1.4rem;
+            border-radius: 18px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: var(--primary-purple);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid var(--glass-border);
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-input-area {
+            padding: 1.8rem;
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 1rem 1.2rem;
+            color: white;
+            outline: none;
+        }
+
+        /* FAB */
+        .fab-chat {
+            position: fixed;
+            bottom: 3rem;
+            right: 3rem;
+            width: 64px;
+            height: 64px;
+            background: var(--primary-purple);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 15px 35px rgba(108, 93, 211, 0.3);
+            z-index: 999;
+            transition: 0.3s;
+        }
+
+        .fab-chat:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body class="animate-fade">
+    <aside class="sidebar glass">
+        <div class="roadmap-header" id="sidebar-language-title">
+            <div style="width:10px; height:24px; background:var(--primary-purple); border-radius:4px;"></div>
+            Roadmap
+        </div>
+        <div id="roadmap-tree">
+            <!-- Dynamic Content -->
+        </div>
+    </aside>
+
+    <div class="main-container">
+        <nav class="top-nav">
+            <a href="dashboard.html" class="btn btn-glass" style="font-size:0.9rem;">← Back to Dashboard</a>
+            <div id="api-status-tutor" class="dot"></div>
+        </nav>
+
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-left">
+                    <span class="current-level-tag" id="display-level">LEVEL</span>
+                    <h1 id="display-topic">Select a Module</h1>
+                    <p id="display-desc">Choose a topic from the roadmap on the left.</p>
+                </div>
+                <button class="btn btn-primary" onclick="markAsComplete()">Mark as Complete</button>
+            </header>
+
+            <section class="video-wrapper glass" id="video-box">
+                <div
+                    style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted);">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"
+                        style="margin-bottom:1rem; opacity:0.3;">
+                        <path
+                            d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
+                    </svg>
+                    <span style="font-weight:600;">Select a topic to start learning</span>
+                </div>
+            </section>
+
+            <nav class="tabs-header">
+                <div class="tab-btn active" onclick="showTab('notes')">Technical Notes</div>
+                <div class="tab-btn" onclick="showTab('workspace')">Personal Workspace</div>
+                <div class="tab-btn" onclick="showTab('quiz')">Interactive Quiz</div>
+                <div class="tab-btn" onclick="showTab('sandbox')">Code Sandbox</div>
+            </nav>
+
+            <div id="tab-notes" class="tab-pane active animate-fade">
+                <div id="ai-notes-content" class="glass-card" style="padding: 2.5rem; line-height: 1.8; min-height: 300px;">
+                    <p style="color:var(--text-muted)">Our AI will generate comprehensive module notes once a topic is
+                        selected.</p>
+                </div>
+            </div>
+
+            <div id="tab-workspace" class="tab-pane animate-fade">
+                <textarea id="user-notes-editor" class="glass"
+                    placeholder="Write your own summaries, code snippets, or thoughts here..."></textarea>
+                <div style="display:flex; justify-content:flex-end; margin-top: 2rem;">
+                    <button class="btn btn-primary" onclick="saveWorkspace()">Save Changes</button>
+                    <span id="save-status"
+                        style="margin-left:15px; font-size:0.9rem; color:#4caf50; font-weight:700; opacity:0; align-self:center;">Progress
+                        Saved!</span>
+                </div>
+            </div>
+
+            <div id="tab-quiz" class="tab-pane animate-fade">
+                <div id="ai-quiz-content">
+                    <p style="color:var(--text-muted)">Interactive AI-driven quizzes will appear here to test your
+                        knowledge.</p>
+                </div>
+            </div>
+
+            <div id="tab-sandbox" class="tab-pane animate-fade">
+                <div style="display:flex; flex-direction:column; gap:1.5rem; height:600px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <p style="color:var(--text-muted); font-size:0.9rem;">Write and test your code live using the Piston engine.</p>
+                        <div style="display:flex; gap:1rem;">
+                            <select id="sandbox-lang" class="glass" style="padding:0.5rem 1rem; border-radius:12px; color:white; outline:none; cursor:pointer;">
+                                <option value="python">Python</option>
+                                <option value="java">Java</option>
+                                <option value="cpp">C++</option>
+                            </select>
+                            <button class="btn btn-primary btn-sm" onclick="runSandboxCode()" style="display:flex; align-items:center; gap:0.5rem; padding:0.5rem 1rem;">
+                                ▶ Run Code
+                            </button>
+                        </div>
+                    </div>
+                    <div id="monaco-editor" class="glass" style="flex:1; border-radius:20px; overflow:hidden;"></div>
+                    <div class="glass" style="height:150px; border-radius:20px; padding:1.5rem; overflow-y:auto; background:rgba(0,0,0,0.4); font-family:monospace; color:#a3b3cc;">
+                        <pre id="sandbox-output" style="margin:0; white-space:pre-wrap;">Terminal ready...</pre>
+                    </div>
+                </div>
+            </div>
+            <!-- Minimal Dashboard Footer -->
+            <footer class="dashboard-footer" style="margin-top: 4rem;">
+                <p>&copy; 2026 AI-TUTOR. All rights reserved.</p>
+                <div style="display:flex; gap:1.5rem;">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Service</a>
+                    <a href="mailto:support@ai-tutor.com">Support</a>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- AI Chatbot Sidebar -->
+    <div class="chat-sidebar" id="chat-panel">
+        <div class="chat-header">
+            <div style="display:flex; align-items:center; gap:0.8rem;">
+                <div id="api-status-chat" class="dot" style="width: 8px; height: 8px; border-radius: 50%; background: #ff4b4b; box-shadow: 0 0 10px #ff4b4b;"></div>
+                <h3 style="font-size:1.1rem; font-weight:800;">AI Tutor Assistant</h3>
+            </div>
+            <button onclick="toggleChat()"
+                style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+        </div>
+        <div style="padding: 1rem 1.8rem; border-bottom: 1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center; background:rgba(255,255,255,0.02);">
+            <span style="font-size:0.85rem; font-weight:700; color:var(--text-gray);">Interview Mode</span>
+            <input type="checkbox" id="interview-mode-toggle" style="width:18px; height:18px; accent-color:var(--primary-purple); cursor:pointer;">
+        </div>
+        <div class="chat-messages" id="chat-history">
+            <div class="message ai">
+                Hello! I am your personal AI Tutor. Ask me anything about the current topic or programming in general!
+            </div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" class="chat-input" id="user-chat-input" placeholder="Type your question..."
+                onkeypress="if(event.key==='Enter') sendMessage()">
+            <button class="btn btn-primary" style="padding:0.7rem 1.2rem;" onclick="sendMessage()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Floating Chat Toggle -->
+    <div class="fab-chat" onclick="toggleChat()">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <script>
+        (function() {
+            const isLiveServer = window.location.port !== '5000' && window.location.port !== '';
+            const prefix = isLiveServer ? '' : '/';
+            document.write('<script src="' + prefix + 'static/js/api-client.js?v=1.1"><\/script>');
+        })();
+    </script>
+
+    <script>
+        if(window.marked) marked.setOptions({ hook: null, breaks: true });
+        const urlParams = new URLSearchParams(window.location.search);
+        const language = urlParams.get('lang') || 'python';
+        const topic_id = urlParams.get('topic') || 'start';
+
+        let activeNode = null;
+        let chatHistory = [];
+        let currentQuiz = null;
+
+        const languageNames = { 'python': 'Python', 'java': 'Java', 'cpp': 'C++' };
+
+        async function init() {
+            document.getElementById('sidebar-language-title').innerHTML += `<span style="margin-left:auto; font-size:0.8rem; background:rgba(108, 93, 211, 0.2); padding:0.3rem 0.6rem; border-radius:6px; color:var(--primary-purple);">${languageNames[language] || language}</span>`;
+
+            let data;
+            const isCustom = topic_id === "custom";
+
+            if (isCustom) {
+                const stored = localStorage.getItem('custom_roadmap');
+                if (stored) {
+                    data = JSON.parse(stored);
+                } else {
+                    window.location.href = 'dashboard.html';
+                    return;
+                }
+            } else {
+                data = await apiClient.request(`/roadmap/${language}`, { method: 'GET' });
+            }
+
+
+
+            const container = document.getElementById('roadmap-tree');
+            container.innerHTML = '';
+
+            let autoSelected = false;
+            ['beginner', 'intermediate', 'advanced'].forEach(level => {
+                if (data[level] && data[level].length > 0) {
+                    const group = document.createElement('div');
+                    group.className = 'level-group';
+                    group.innerHTML = `<span class="level-title">${level}</span>`;
+
+                    data[level].forEach((node, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'node-card glass';
+                        card.innerHTML = `<h4>${node.topic}</h4><p>${node.description}</p>`;
+                        card.onclick = () => selectModule(node, level, card);
+                        group.appendChild(card);
+
+                        if (!autoSelected) {
+                            setTimeout(() => selectModule(node, level, card), 100);
+                            autoSelected = true;
+                        }
+                    });
+                    container.appendChild(group);
+                }
+            });
+        }
+
+        async function selectModule(node, level, element) {
+            document.querySelectorAll('.node-card').forEach(c => c.classList.remove('active'));
+            element.classList.add('active');
+
+            activeNode = node;
+            document.getElementById('display-level').innerText = level;
+            document.getElementById('display-topic').innerText = node.topic;
+            document.getElementById('display-desc').innerText = node.description;
+
+            // 1. Fetch Video
+            try {
+                const videoContainer = document.getElementById('video-box');
+                // Anti-flicker: Only show spinner if request takes more than 300ms
+                const spinnerTimeout = setTimeout(() => {
+                    videoContainer.innerHTML = '<div style="height:100%; display:flex; align-items:center; justify-content:center;"><div class="spinner"></div></div>';
+                }, 300);
+
+                const vidData = await apiClient.request('/api/video', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        topic: node.topic,
+                        language: language,
+                        refresh: true // Always try to get a fresh one if possible or at least re-verify
+                    })
+                });
+
+                clearTimeout(spinnerTimeout);
+
+                if (vidData.video_url) {
+                    videoContainer.innerHTML = `
+                        <div style="position:relative; width:100%; height:100%;">
+                            <iframe width="100%" height="100%" src="${vidData.video_url}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="border-radius:24px;"></iframe>
+                            <button onclick="selectModule(activeNode, document.getElementById('display-level').innerText, document.querySelector('.node-card.active'))" 
+                                    style="position:absolute; bottom:20px; right:20px; padding:0.5rem 1rem; font-size:0.7rem; background:rgba(0,0,0,0.6); color:white; border:1px solid rgba(255,255,255,0.2); border-radius:8px; cursor:pointer; backdrop-filter:blur(5px); transition:0.3s;"
+                                    onmouseover="this.style.background='rgba(108, 93, 211, 0.8)'"
+                                    onmouseout="this.style.background='rgba(0,0,0,0.6)'">
+                                🔄 Refresh Video
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    throw new Error("No video found");
+                }
+            } catch (err) {
+                const isOffline = apiClient.status !== 'connected';
+                const isAuthError = !apiClient.isAuthenticated;
+                
+                document.getElementById('video-box').innerHTML = `
+                    <div style="height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text-muted); text-align:center; padding:3rem;">
+                        <p style="font-size:3rem; margin-bottom:1rem; filter: grayscale(1); opacity: 0.8;">${isOffline ? '🔌' : (isAuthError ? '🔐' : '⚠️')}</p>
+                        <h3 style="color:white; margin-bottom:0.5rem;">${isOffline ? 'Backend Offline' : (isAuthError ? 'Login Required' : 'Video Unreachable')}</h3>
+                        <p style="max-width:300px; margin-bottom:1.5rem;">${isOffline ? 'The AI Tutor backend is not connected.' : (isAuthError ? 'Please log in to the backend at port 5000 to enable live features.' : 'Google API quota might be exhausted for this session.')}</p>
+                        <div style="display:flex; gap:1rem;">
+                            ${isAuthError ? `<a href="http://127.0.0.1:5000/login" target="_blank" class="btn btn-primary" style="text-decoration:none;">Log In</a>` : `<a href="https://www.youtube.com/results?search_query=${encodeURIComponent(node.topic + ' ' + language + ' tutorial')}" target="_blank" class="btn btn-primary" style="text-decoration:none;">Search Manual</a>`}
+                            <button onclick="selectModule(activeNode, document.getElementById('display-level').innerText, document.querySelector('.node-card.active'))" class="btn btn-glass">Retry</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+
+            // 2. Fetch AI Notes
+            const notesContainer = document.getElementById('ai-notes-content');
+            const notesSpinnerTimeout = setTimeout(() => {
+                notesContainer.innerHTML = '<div style="display:flex; align-items:center; gap:10px;"><div class="spinner" style="width:20px; height:20px; border-width:2px;"></div> <span style="color:var(--primary-purple); font-size:0.9rem; font-weight:700;">Generating premium insights...</span></div>';
+            }, 300);
+
+            try {
+                const notesData = await apiClient.request('/api/notes', {
+                    method: 'POST',
+                    body: JSON.stringify({ topic: node.topic, language: language })
+                });
+                clearTimeout(notesSpinnerTimeout);
+                notesContainer.innerHTML = notesData.notes || "No notes generated.";
+            } catch (err) {
+                clearTimeout(notesSpinnerTimeout);
+                const isOffline = apiClient.status !== 'connected';
+                const isAuthError = !apiClient.isAuthenticated;
+                
+                document.getElementById('ai-notes-content').innerHTML = `
+                    <div style="text-align:center; padding:2rem;">
+                        <p style="color:${isAuthError ? '#ff9f2d' : '#ff4b4b'}; font-weight:700; margin-bottom:1rem;">${isOffline ? 'Backend Disconnected' : (isAuthError ? 'Authentication Required' : 'Generation Failed')}</p>
+                        <p style="color:var(--text-muted); font-size:0.9rem;">${isOffline ? 'AI Insights require the Python backend to be running.' : (isAuthError ? 'Please log in to the backend at port 5000 to enable AI generation.' : 'Please check your internet connection or API keys.')}</p>
+                    </div>
+                `;
+            }
+
+
+            loadWorkspace(node.id || node.topic);
+        }
+
+        function showTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.tab-btn[onclick="showTab('${tab}')"]`).classList.add('active');
+
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+
+            if (tab === 'quiz' && activeNode) {
+                if (document.getElementById('ai-quiz-content').innerHTML.includes('Interactive')) {
+                    generateQuiz();
+                }
+            }
+        }
+
+        async function generateQuiz() {
+            document.getElementById('ai-quiz-content').innerHTML = '<div style="display:flex; align-items:center; gap:10px;"><div class="spinner" style="width:20px; height:20px; border-width:2px;"></div> <span style="color:var(--primary-purple); font-size:0.9rem; font-weight:700;">Preparing assessment...</span></div>';
+            try {
+                const data = await apiClient.request('/api/quiz', {
+                    method: 'POST',
+                    body: JSON.stringify({ topic: activeNode.topic, language: language })
+                });
+                currentQuiz = data.quiz;
+                renderQuiz(data.quiz);
+            } catch (err) {
+                document.getElementById('ai-quiz-content').innerHTML = `<p>Failed to generate quiz.</p>`;
+            }
+        }
+
+        function renderQuiz(questions) {
+            const box = document.getElementById('ai-quiz-content');
+            if (!questions || questions.length === 0) {
+                box.innerHTML = "No quiz questions.";
+                return;
+            }
+            let html = '<div style="display:flex; flex-direction:column; gap:2.5rem;">';
+            questions.forEach((q, i) => {
+                // Formatting code blocks in question
+                const formattedQuestion = q.question.replace(/```(python|javascript|js|json)?\n?([\s\S]*?)```/g, '<pre style="background:rgba(0,0,0,0.3); padding:1rem; border-radius:8px; margin:1rem 0; overflow-x:auto;"><code>$2</code></pre>');
+
+                html += `<div class="glass-card">
+                    <p style="margin-bottom:1.5rem; font-weight:800; font-size:1.1rem;">Q${i + 1}: ${formattedQuestion}</p>
+                    <div style="display:flex; flex-direction:column; gap:1rem;">
+                        ${q.options.map((opt, oi) => `
+                            <label class="glass" style="padding:1.2rem; border-radius:14px; cursor:pointer; display:flex; align-items:center; gap:1.2rem; transition: background 0.3s;">
+                                <input type="radio" name="q${i}" value="${oi}" style="accent-color:var(--primary-purple); width:20px; height:20px;"> 
+                                <span style="font-weight:600;">${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>`;
+            });
+            html += `<div style="display:flex; justify-content:center;"><button class="btn btn-primary" style="padding:1.4rem 4rem;" onclick="submitQuiz()">Submit Assessment</button></div></div>`;
+            box.innerHTML = html;
+        }
+
+        async function submitQuiz() {
+            if (!currentQuiz || !activeNode) return;
+
+            const results = [];
+            let score = 0;
+            currentQuiz.forEach((q, i) => {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                const val = selected ? parseInt(selected.value) : -1;
+                const isCorrect = val === q.answer;
+                if (isCorrect) score++;
+                results.push({ question: q, selected: val, isCorrect });
+            });
+            
+            window.lastQuizResults = results;
+
+            const total = currentQuiz.length;
+            const percentage = Math.round((score / total) * 100);
+
+            // Display loading results
+            document.getElementById('ai-quiz-content').innerHTML = `
+                <div style="text-align:center; padding:3rem;" class="animate-fade">
+                    <div class="spinner" style="margin:0 auto 2rem;"></div>
+                    <h3>Calculating your score...</h3>
+                </div>
+            `;
+
+            try {
+                await apiClient.request('/api/quiz/submit', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        topic_id: activeNode.id || activeNode.topic,
+                        language: language,
+                        score: score,
+                        total_questions: total
+                    })
+                });
+
+                // Final results display with detailed feedback
+                let feedbackHtml = `
+                    <div style="text-align:center; padding:3rem; margin-bottom:3rem;" class="glass-card animate-fade">
+                        <div style="font-size:4rem; margin-bottom:1rem;">${percentage >= 70 ? '🎉' : '📚'}</div>
+                        <h2 style="font-size:2.5rem; font-weight:800; margin-bottom:0.5rem;">Score: ${percentage}%</h2>
+                        <p style="color:var(--text-muted); margin-bottom:1.5rem;">You got ${score} out of ${total} correct.</p>
+                        <div style="display:flex; gap:1rem; justify-content:center;">
+                             <button class="btn btn-primary btn-sm" onclick="generateQuiz()">Try Again</button>
+                             ${percentage < 100 ? `<button class="btn btn-primary btn-sm" style="background:#ff9f2d;" onclick="reviewQuiz()">AI Review</button>` : ''}
+                             <a href="dashboard.html" class="btn btn-glass btn-sm" style="text-decoration:none;">Finish</a>
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:2rem;">
+                `;
+
+                results.forEach((r, i) => {
+                    const q = r.question;
+                    const formattedQuestion = q.question.replace(/```(python|javascript|js|json)?\n?([\s\S]*?)```/g, '<pre style="background:rgba(0,0,0,0.3); padding:1rem; border-radius:8px; margin:1rem 0; overflow-x:auto;"><code>$2</code></pre>');
+
+                    feedbackHtml += `
+                        <div class="glass-card" style="border-left: 6px solid ${r.isCorrect ? '#4ade80' : '#f87171'}">
+                            <p style="margin-bottom:1rem; font-weight:800;">Q${i + 1}: ${formattedQuestion}</p>
+                            <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
+                                ${q.options.map((opt, oi) => {
+                        let style = "opacity: 0.7;";
+                        let icon = "";
+                        if (oi === q.answer) {
+                            style = "color: #4ade80; font-weight:700;";
+                            icon = "✅ ";
+                        } else if (oi === r.selected) {
+                            style = "color: #f87171; font-weight:700; text-decoration: line-through;";
+                            icon = "❌ ";
+                        }
+                        return `<div style="${style}">${icon}${opt}</div>`;
+                    }).join('')}
+                            </div>
+                            <div style="background:rgba(255,255,255,0.05); padding:1rem; border-radius:8px; font-size:0.9rem;">
+                                <strong>Explanation:</strong> ${q.explanation || 'No detail provided.'}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                feedbackHtml += '</div>';
+                document.getElementById('ai-quiz-content').innerHTML = feedbackHtml;
+
+            } catch (err) {
+                console.error(err);
+                alert("Failed to save results. Check your connection.");
+            }
+        }
+
+        async function saveWorkspace() {
+            if (!activeNode) return;
+            const content = document.getElementById('user-notes-editor').value;
+            const resp = await apiClient.request('/api/notes/save', {
+                method: 'POST',
+                body: JSON.stringify({ topic_id: activeNode.id || activeNode.topic, content })
+            });
+            if (resp && resp.status === 'success') {
+                const status = document.getElementById('save-status');
+                status.style.opacity = '1';
+                setTimeout(() => { status.style.opacity = '0'; }, 2000);
+            }
+        }
+
+        async function loadWorkspace(id) {
+            const data = await apiClient.request(`/api/notes/load/${id}`, { method: 'GET' });
+            document.getElementById('user-notes-editor').value = data.content || "";
+        }
+
+        function toggleChat() {
+            document.getElementById('chat-panel').classList.toggle('open');
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('user-chat-input');
+            const query = input.value.trim();
+            if (!query) return;
+
+            const history = document.getElementById('chat-history');
+            history.innerHTML += `<div class="message user">${query}</div>`;
+            input.value = '';
+            history.scrollTop = history.scrollHeight;
+
+            const topic = activeNode ? activeNode.topic : "General Programming";
+
+            const aiMsg = document.createElement('div');
+            aiMsg.className = 'message ai animate-fade';
+            aiMsg.innerHTML = '<div class="spinner" style="width:16px; height:16px; border-width:2px;"></div>';
+            history.appendChild(aiMsg);
+            history.scrollTop = history.scrollHeight;
+
+            const isInterview = document.getElementById('interview-mode-toggle').checked;
+
+            const data = await apiClient.request('/api/chat', {
+                method: 'POST',
+                body: JSON.stringify({ query, topic, history: chatHistory, interview_mode: isInterview })
+            });
+
+            let parsedResp = data.response;
+            try { if(window.marked) parsedResp = marked.parse(data.response); } catch(e){}
+
+            aiMsg.innerHTML = parsedResp;
+            chatHistory.push({ "role": "user", "content": query });
+            chatHistory.push({ "role": "assistant", "content": data.response });
+            history.scrollTop = history.scrollHeight;
+        }
+
+        async function reviewQuiz() {
+            if(!window.lastQuizResults) return;
+            const failedText = window.lastQuizResults.filter(r => !r.isCorrect).map((r, i) => `Q: ${r.question.question} | I chose: ${r.question.options[r.selected] || 'Nothing'}`).join('\\n');
+            if (!failedText) { alert('You got everything right!'); return; }
+            
+            document.getElementById('ai-quiz-content').innerHTML = `
+                <div style="text-align:center; padding:3rem;" class="animate-fade">
+                    <div class="spinner" style="margin:0 auto 2rem;"></div>
+                    <h3>AI is analyzing your mistakes...</h3>
+                </div>
+            `;
+            
+            try {
+                const resp = await apiClient.request('/api/review_quiz', {
+                    method: 'POST',
+                    body: JSON.stringify({ errors: failedText, topic: activeNode ? (activeNode.topic || activeNode.id) : topic_id })
+                });
+                document.getElementById('ai-quiz-content').innerHTML = `
+                    <div class="glass-card animate-fade" style="padding:2.5rem;">
+                        <h3 style="margin-bottom:1.5rem; color:#ff9f2d; display:flex; align-items:center; gap:0.5rem;">💡 AI Feedback</h3>
+                        <div style="line-height:1.7; color:white; font-size:1.05rem;">${resp.feedback}</div>
+                        <button class="btn btn-primary" style="margin-top:2.5rem;" onclick="generateQuiz()">Retake Assessment</button>
+                    </div>
+                `;
+            } catch(e) { 
+                alert("Failed to load AI review.");
+                generateQuiz();
+            }
+        }
+
+        // Monaco Editor Setup
+        let codeEditor;
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+        require(['vs/editor/editor.main'], function () {
+            codeEditor = monaco.editor.create(document.getElementById('monaco-editor'), {
+                value: '# Start coding here...\\nprint("Hello, AI-TUTOR!")',
+                language: 'python',
+                theme: 'vs-dark',
+                automaticLayout: true,
+                minimap: { enabled: false }
+            });
+        });
+
+        document.getElementById('sandbox-lang').addEventListener('change', (e) => {
+            let lang = e.target.value;
+            let monacoLang = lang;
+            if (codeEditor) {
+                monaco.editor.setModelLanguage(codeEditor.getModel(), monacoLang);
+            }
+        });
+
+        async function runSandboxCode() {
+            if(!codeEditor) return;
+            const code = codeEditor.getValue();
+            const lang = document.getElementById('sandbox-lang').value;
+            const outBox = document.getElementById('sandbox-output');
+            
+            outBox.innerHTML = '<span style="color:var(--primary-purple);">Executing code...</span>';
+            
+            try {
+                const res = await apiClient.request('/api/execute', {
+                    method: 'POST',
+                    body: JSON.stringify({ code, language: lang })
+                });
+                
+                if (res.error) {
+                    outBox.innerHTML = `<span style="color:#ff4b4b;">${res.error}</span>`;
+                } else {
+                    outBox.innerText = res.output || "(No output)";
+                }
+            } catch (e) {
+                outBox.innerHTML = `<span style="color:#ff4b4b;">Execution Failed: Server unreachable</span>`;
+            }
+        }
+
+        // Live Chat Status tracking
+        function updateChatStatus(status) {
+            const chatDot = document.getElementById('api-status-chat');
+            if (!chatDot) return;
+            
+            if (status === 'connected') {
+                if (apiClient.isAuthenticated) {
+                    chatDot.style.background = '#4caf50'; // Green: live and authenticated
+                    chatDot.style.boxShadow = '0 0 10px #4caf50';
+                    chatDot.title = 'AI Tutor Status: Online & Authenticated';
+                } else {
+                    chatDot.style.background = '#ffca28'; // Yellow: online but needs login
+                    chatDot.style.boxShadow = '0 0 10px #ffca28';
+                    chatDot.title = 'AI Tutor Status: Authentication Required (Port 5000)';
+                }
+            } else {
+                chatDot.style.background = '#ff4b4b'; // Red: offline
+                chatDot.style.boxShadow = '0 0 10px #ff4b4b';
+                chatDot.title = 'AI Tutor Status: Offline (Run python app.py)';
+            }
+        }
+
+        apiClient.onStatusChange(updateChatStatus);
+        
+        // Initial run to capture current state
+        setTimeout(() => {
+            updateChatStatus(apiClient.status);
+        }, 500);
+
+        init();
+    </script>
+</body>
+
+</html>

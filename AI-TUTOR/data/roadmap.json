@@ -1,0 +1,116 @@
+{
+  "python": {
+    "beginner": [
+      {
+        "id": "py_01",
+        "topic": "Python Basics",
+        "description": "Variables, Data Types, and Operators"
+      },
+      {
+        "id": "py_02",
+        "topic": "Control Flow",
+        "description": "If statements, For and While loops"
+      }
+    ],
+    "intermediate": [
+      {
+        "id": "py_03",
+        "topic": "Functions & Modules",
+        "description": "Defining functions and importing modules"
+      },
+      {
+        "id": "py_04",
+        "topic": "File I/O",
+        "description": "Reading and writing files"
+      }
+    ],
+    "advanced": [
+      {
+        "id": "py_05",
+        "topic": "Object Oriented Programming",
+        "description": "Classes, Objects, and Inheritance"
+      },
+      {
+        "id": "py_06",
+        "topic": "Decorators & Generators",
+        "description": "Advanced Python features"
+      }
+    ]
+  },
+  "java": {
+    "beginner": [
+      {
+        "id": "jv_01",
+        "topic": "Java Syntax & Variables",
+        "description": "Setting up JDK and basic syntax"
+      },
+      {
+        "id": "jv_02",
+        "topic": "Java Control Statements",
+        "description": "If-else, Switches, and Loops"
+      }
+    ],
+    "intermediate": [
+      {
+        "id": "jv_03",
+        "topic": "Java Classes & Objects",
+        "description": "Core OOP concepts in Java"
+      },
+      {
+        "id": "jv_04",
+        "topic": "Exception Handling",
+        "description": "Try-catch blocks and error management"
+      }
+    ],
+    "advanced": [
+      {
+        "id": "jv_05",
+        "topic": "Java Multithreading",
+        "description": "Parallel processing and concurrent tasks"
+      },
+      {
+        "id": "jv_06",
+        "topic": "Java Collections Framework",
+        "description": "Advanced data structures (List, Map, Set)"
+      }
+    ]
+  },
+  "cpp": {
+    "beginner": [
+      {
+        "id": "cpp_01",
+        "topic": "C++ Basics",
+        "description": "Compilers, Variables, and I/O"
+      },
+      {
+        "id": "cpp_02",
+        "topic": "Control flow in C++",
+        "description": "Loops and Decision making"
+      }
+    ],
+    "intermediate": [
+      {
+        "id": "cpp_03",
+        "topic": "Pointers & Memory",
+        "description": "Managing memory and direct access"
+      },
+      {
+        "id": "cpp_04",
+        "topic": "Classes & Constructors",
+        "description": "OOP and resource management"
+      }
+    ],
+    "advanced": [
+      {
+        "id": "cpp_05",
+        "topic": "Standard Template Library (STL)",
+        "description": "Containers, Iterators, and Algorithms"
+      },
+      {
+        "id": "cpp_06",
+        "topic": "Templates & Generics",
+        "description": "Writing reusable and flexible code"
+      }
+    ]
+  }
+}

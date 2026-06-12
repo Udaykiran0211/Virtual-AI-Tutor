@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-TUTOR | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="static/css/style.css">
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-section {
+            margin-bottom: 3rem;
+        }
+
+        .nav-label {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+            display: block;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            padding: 1rem 1.2rem;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 16px;
+            margin-bottom: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: white;
+            background: rgba(108, 93, 211, 0.2);
+            border: 1px solid rgba(108, 93, 211, 0.3);
+        }
+
+        /* Main Content */
+        .content-wrapper {
+            flex: 1;
+            margin-left: 280px;
+            padding: 3rem 5%;
+            max-width: 1400px;
+        }
+
+        .header-welcome {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4rem;
+        }
+
+        .welcome-text h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-text p {
+            color: var(--text-muted);
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            min-height: 120px; /* Stabilization */
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-color 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        .stat-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-info span {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-info h3 {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        /* Main Grid */
+        .dashboard-main-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 3rem;
+            margin-bottom: 4rem;
+        }
+
+        /* Section Styling */
+        .section-box {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Course Cards */
+        .learning-paths-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            min-height: 350px; /* Stabilization */
+        }
+
+        /* Path Cards */
+        .path-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .path-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            padding: 1.5rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s;
+        }
+
+        .path-card:hover {
+            border-color: var(--primary-purple);
+            background: rgba(108, 93, 211, 0.1);
+            transform: translateX(5px);
+        }
+
+        .path-icon {
+            font-size: 2.5rem;
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .path-details h4 {
+            font-size: 1.2rem;
+            margin-bottom: 0.3rem;
+            font-weight: 700;
+        }
+
+        .path-details p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Goal Box */
+        .goal-box {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .goal-input {
+            width: 100%;
+            padding: 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .goal-input:focus {
+            border-color: var(--primary-purple);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-action {
+            background: var(--primary-purple);
+            color: white;
+            border: none;
+            padding: 1.2rem;
+            border-radius: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(108, 93, 211, 0.3);
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 93, 211, 0.5);
+            background: #5a4cb3;
+        }
+
+        /* Progress Circle */
+        .progress-container {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-svg {
+            transform: rotate(-90deg);
+        }
+
+        .bg-circle {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 8;
+        }
+
+        .main-circle {
+            fill: none;
+            stroke: var(--primary-purple);
+            stroke-width: 8;
+            stroke-linecap: round;
+            transition: 1.5s;
+        }
+
+        .percent-text {
+            position: absolute;
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        /* Status Dot */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.6rem 1.2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4caf50;
+            box-shadow: 0 0 10px #4caf50;
+        }
+
+        /* Loading Overlay */
+        .loader {
+            position: fixed;
+            inset: 0;
+            background: rgba(11, 14, 20, 0.9);
+            backdrop-filter: blur(10px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(108, 93, 211, 0.1);
+            border-top: 4px solid var(--primary-purple);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 1100px) {
+
+            .dashboard-grid,
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body class="animate-fade">
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top: 2rem; font-weight: 700; color: var(--primary-purple);">AI is architecting your roadmap...
+        </p>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <a href="index.html" class="logo">
+            <div class="logo-icon">A</div>
+            <span class="logo-text">AI-TUTOR</span>
+        </a>
+
+        <div class="nav-section">
+            <span class="nav-label">Core</span>
+            <a href="dashboard.html" class="nav-item active"><i>🏠</i> Dashboard</a>
+            <a href="messages.html" class="nav-item"><i>💬</i> Messages</a>
+            <a href="#my-quizzes-section" class="nav-item"><i>⭐</i> My Quizzes</a>
+        </div>
+
+        <div class="nav-section">
+            <span class="nav-label">Preferences</span>
+            <a href="#" class="nav-item"><i>⚙️</i> Settings</a>
+            <a href="index.html" class="nav-item" style="margin-top:2rem; color:#ff4b4b;"><i>🚪</i> Sign Out</a>
+        </div>
+
+        <div style="margin-top: auto;">
+            <div class="status-pill">
+                <div id="api-status" class="dot"></div>
+                <span>Server Online</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content-wrapper">
+        <header class="header-welcome">
+            <div class="welcome-text">
+                <h1>Welcome back, <span id="user-name">Student</span>!</h1>
+                <p>Track your progress and continue your journey with AI-TUTOR.</p>
+            </div>
+
+            <a href="profile.html" style="display:flex; align-items:center; gap:1.5rem; cursor:pointer; padding: 0.5rem 1rem; border-radius: 20px; text-decoration: none; color: inherit; transition: 0.3s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">
+                <div style="text-align:right;">
+                    <div id="user-role-display" style="font-weight:800; font-size:1rem;">Academic</div>
+                    <div id="user-plan-display" style="font-size:0.8rem; color:var(--text-gray);">Basic Plan</div>
+                </div>
+                <img id="avatar-display" src="https://ui-avatars.com/api/?name=User&background=6C5DD3&color=fff"
+                    style="width:52px; height:52px; border-radius:18px; box-shadow: 0 4px 10px rgba(108, 93, 211, 0.3);">
+            </a>
+        </header>
+
+        <section class="stats-row">
+            <div onclick="openAssessmentsModal()" class="stat-card" style="cursor:pointer;">
+                <div class="stat-icon" style="background:#F4F2FF; color:#6C5DD3;">📚</div>
+                <div class="stat-info">
+                    <span>Assessments</span>
+                    <h3 id="assessments-display">0 Completed</h3>
+                </div>
+            </div>
+            <div onclick="openProgressModal()" class="stat-card" style="cursor:pointer;">
+                <div class="stat-icon" style="background:#EBF9F8; color:#32A096;">🎯</div>
+                <div class="stat-info">
+                    <span>Progress</span>
+                    <h3 id="progress-percent-display">0% Complete</h3>
+                </div>
+            </div>
+            <div onclick="openStreakModal()" class="stat-card" style="cursor:pointer;">
+                <div class="stat-icon" style="background:#FFF8F1; color:#FF9F2D;">⌛</div>
+                <div class="stat-info">
+                    <span>Active Days</span>
+                    <h3 id="streak-display">0 Days Streak</h3>
+                </div>
+            </div>
+        </section>
+
+        <div class="dashboard-main-grid">
+            <div class="section-box">
+                <div class="section-title">
+                    <span>Learning Paths</span>
+                    <a href="#" style="font-size:0.85rem; color:var(--primary-purple); text-decoration:none;">View
+                        All</a>
+                </div>
+
+                <div class="learning-paths-list">
+                    <a href="tutor.html?lang=python" class="path-card">
+                        <div class="path-icon">🐍</div>
+                        <div class="path-details">
+                            <h4>Python Development</h4>
+                            <p>Master AI, Data Science, and script automation.</p>
+                        </div>
+                        <div style="margin-left:auto; color:var(--text-gray); font-weight:700;">➜</div>
+                    </a>
+                    <a href="tutor.html?lang=java" class="path-card">
+                        <div class="path-icon">☕</div>
+                        <div class="path-details">
+                            <h4>Java Architecture</h4>
+                            <p>Enterprise applications and robust backend systems.</p>
+                        </div>
+                        <div style="margin-left:auto; color:var(--text-gray); font-weight:700;">➜</div>
+                    </a>
+                    <a href="tutor.html?lang=cpp" class="path-card">
+                        <div class="path-icon">⚙️</div>
+                        <div class="path-details">
+                            <h4>C++ Engineering</h4>
+                            <p>High-performance systems and game development.</p>
+                        </div>
+                        <div style="margin-left:auto; color:var(--text-gray); font-weight:700;">➜</div>
+                    </a>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:2.5rem;">
+                <div class="section-box" style="text-align:center;">
+                    <h3 style="font-size:1.1rem; margin-bottom:2rem; text-align:left;">Core Metrics</h3>
+                    <div class="progress-circle-container">
+                        <svg class="progress-svg" width="160" height="160">
+                            <circle class="bg-circle" cx="80" cy="80" r="70"></circle>
+                            <circle id="progressCircle" class="main-circle" cx="80" cy="80" r="70"
+                                style="stroke-dasharray: 440; stroke-dashoffset: 440;"></circle>
+                        </svg>
+                        <div class="percentage-text" id="circle-percent-text">0%</div>
+                    </div>
+                    <p style="font-size:0.9rem; color:var(--text-gray); font-weight:500;">Keep pushing! You're almost at
+                        your next milestone.</p>
+                </div>
+
+                <div class="section-box">
+                    <h3 style="font-size:1.1rem; margin-bottom:1.5rem;">Creative Goal</h3>
+                    <div class="goal-box">
+                        <input type="text" id="goal-input" class="goal-input" placeholder="e.g. Build a Chat App">
+                        <select id="goal-lang" class="goal-input" style="cursor:pointer;">
+                            <option value="python">Python</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                        <button onclick="generateCustomPath()" class="btn-action">Build My Map</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+
+        <div id="my-quizzes-section" class="section-box" style="margin-top: 2rem;">
+            <h3 class="section-title">My Quizzes</h3>
+            <div style="overflow-x: auto;">
+                <table style="width:100%; border-collapse: separate; border-spacing: 0 1rem;">
+                    <thead>
+                        <tr
+                            style="text-align:left; color:var(--text-gray); font-size:0.75rem; font-weight:800; text-transform:uppercase;">
+                            <th style="padding:0 1rem;">Topic</th>
+                            <th style="padding:0 1rem;">Score</th>
+                            <th style="padding:0 1rem;">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="quiz-history-body">
+                        <!-- Fetched via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Minimal Dashboard Footer -->
+        <footer class="dashboard-footer">
+            <p>&copy; 2026 AI-TUTOR. All rights reserved.</p>
+            <div style="display:flex; gap:1.5rem;">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="mailto:support@ai-tutor.com">Support</a>
+            </div>
+        </footer>
+
+        <!-- Assessments Modal -->
+        <div id="assessments-modal" class="loader" style="display:none; align-items:center; justify-content:center; padding: 20px;">
+            <div style="background:var(--primary-bg, #1e2128); border-radius: 24px; padding: 2rem; width: 100%; max-width: 600px; border: 1px solid rgba(255,255,255,0.1); position: relative;">
+                <button onclick="closeAssessmentsModal()" style="position: absolute; right: 20px; top: 20px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                <h3 style="margin-bottom: 1.5rem;">Assessments History (<span id="modal-assessments-count">0</span> Taken)</h3>
+                <div style="overflow-x: auto; max-height: 400px;">
+                    <table style="width:100%; border-collapse: separate; border-spacing: 0 1rem;">
+                        <thead>
+                            <tr style="text-align:left; color:var(--text-gray); font-size:0.75rem; font-weight:800; text-transform:uppercase;">
+                                <th style="padding:0 1rem;">Topic</th>
+                                <th style="padding:0 1rem;">Score</th>
+                                <th style="padding:0 1rem;">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modal-quiz-history-body">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Modal -->
+        <div id="progress-modal" class="loader" style="display:none; align-items:center; justify-content:center; padding: 20px;">
+            <div style="background:var(--primary-bg, #1e2128); border-radius: 24px; padding: 2rem; width: 100%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1); position: relative; text-align: center;">
+                <button onclick="closeProgressModal()" style="position: absolute; right: 20px; top: 20px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                <h3 style="margin-bottom: 1.5rem;">Course Progress</h3>
+                <h1 style="font-size: 4rem; color: var(--primary-purple, #6c5dd3); margin-bottom: 1rem;" id="modal-progress-percent">0%</h1>
+                <p style="color: var(--text-gray, #8f95b2);">Overall curriculum completion rate.</p>
+                <button onclick="closeProgressModal()" class="btn-action" style="margin-top: 2rem; width: 100%;">Keep Learning</button>
+            </div>
+        </div>
+
+        <!-- Streak Modal -->
+        <div id="streak-modal" class="loader" style="display:none; align-items:center; justify-content:center; padding: 20px;">
+            <div style="background:var(--primary-bg, #1e2128); border-radius: 24px; padding: 2rem; width: 100%; max-width: 400px; border: 1px solid rgba(255,255,255,0.1); position: relative; text-align: center;">
+                <button onclick="closeStreakModal()" style="position: absolute; right: 20px; top: 20px; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                <div style="font-size: 4rem; margin-bottom: 1rem;">🔥</div>
+                <h3 style="margin-bottom: 1rem;">Daily Streak</h3>
+                <h1 style="font-size: 3rem; color: #ff9f2d; margin-bottom: 1rem;" id="modal-streak-count">0 Days</h1>
+                <p style="color: var(--text-gray, #8f95b2);">Return tomorrow to keep your learning streak alive!</p>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="static/js/api-client.js?v=1.1"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const data = await apiClient.request('/api/user_stats');
+
+                // Update text
+                document.getElementById('user-name').innerText = data.username;
+
+                const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.username)}&background=6C5DD3&color=fff`;
+                document.getElementById('avatar-display').src = avatarUrl;
+                
+                // Populate Profile Modal UI
+                if (document.getElementById('assessments-display')) {
+                    document.getElementById('assessments-display').innerText = `${data.assessments_count} Completed`;
+                }
+                document.getElementById('progress-percent-display').innerText = `${data.progress_percent}% Complete`;
+                document.getElementById('circle-percent-text').innerText = `${data.progress_percent}%`;
+                
+                // Update Progress Modal text
+                if (document.getElementById('modal-progress-percent')) {
+                    document.getElementById('modal-progress-percent').innerText = `${data.progress_percent}%`;
+                }
+
+                if (document.getElementById('streak-display')) {
+                    document.getElementById('streak-display').innerText = `${data.streak_count || 0} Days Streak`;
+                }
+                if (document.getElementById('modal-streak-count')) {
+                    document.getElementById('modal-streak-count').innerText = `${data.streak_count || 0} Days`;
+                }
+                if (document.getElementById('user-role-display')) {
+                    document.getElementById('user-role-display').innerText = data.role || 'Student';
+                }
+                if (document.getElementById('user-plan-display')) {
+                    document.getElementById('user-plan-display').innerText = data.plan || 'Basic Plan';
+                }
+
+                // Update Progress Circle
+                const circle = document.getElementById('progressCircle');
+                const circumference = 440;
+                const offset = circumference - (circumference * data.progress_percent / 100);
+                circle.style.strokeDashoffset = offset;
+
+                // Update Lessons Table
+                const tbody = document.getElementById('recent-lessons-body');
+                if (data.recent_lessons && data.recent_lessons.length > 0) {
+                    tbody.innerHTML = data.recent_lessons.map(lesson => `
+                        <tr style="background:#F8F9FD; border-radius:16px;">
+                            <td style="padding:1.5rem 1rem; font-weight:700; border-radius:16px 0 0 16px;">${lesson.topic_id}</td>
+                            <td style="padding:1.5rem 1rem;"><span style="color:var(--primary-purple); font-weight:800; font-size:0.8rem;">${lesson.language.toUpperCase()}</span></td>
+                            <td style="padding:1.5rem 1rem;">
+                                ${lesson.completed ? '<span style="color:#32A096; font-weight:700;">✓ Done</span>' : '<span style="color:var(--text-gray); font-weight:600;">Processing</span>'}
+                            </td>
+                            <td style="padding:1.5rem 1rem; text-align:right; border-radius:0 16px 16px 0;">
+                                <a href="tutor.html?lang=${lesson.language}&topic=${lesson.topic_id}" style="color:var(--primary-purple); font-weight:800; text-decoration:none; font-size:0.9rem;">Resume</a>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" style="padding:4rem; text-align:center; color:var(--text-gray); font-weight:500;">No activity yet. Start your first lesson!</td></tr>`;
+                }
+
+                // Update Quiz History
+                const quizBody = document.getElementById('quiz-history-body');
+                if (data.quiz_history && data.quiz_history.length > 0) {
+                    quizBody.innerHTML = data.quiz_history.map(quiz => `
+                        <tr style="background:#F8F9FD; border-radius:16px;">
+                            <td style="padding:1.5rem 1rem; font-weight:700; border-radius:16px 0 0 16px;">
+                                ${quiz.topic_id} 
+                                <span style="font-size:0.7rem; color:var(--primary-purple); margin-left:8px; opacity:0.7;">${quiz.language.toUpperCase()}</span>
+                            </td>
+                            <td style="padding:1.5rem 1rem;">
+                                <span style="font-weight:800; color:${(quiz.score / quiz.total_questions) >= 0.7 ? '#32A096' : 'var(--text-gray)'}">
+                                    ${quiz.score}/${quiz.total_questions}
+                                </span>
+                            </td>
+                            <td style="padding:1.5rem 1rem; border-radius:0 16px 16px 0; color:var(--text-muted); font-size:0.85rem;">
+                                ${new Date(quiz.timestamp).toLocaleDateString()}
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    quizBody.innerHTML = `<tr><td colspan="3" style="padding:4rem; text-align:center; color:var(--text-gray); font-weight:500;">No assessments taken yet.</td></tr>`;
+                }
+
+                // Populate Modal as well
+                const modalQuizBody = document.getElementById('modal-quiz-history-body');
+                document.getElementById('modal-assessments-count').innerText = data.assessments_count || 0;
+                
+                if (data.quiz_history && data.quiz_history.length > 0) {
+                    modalQuizBody.innerHTML = quizBody.innerHTML; // Copy the exact rows built above
+                } else {
+                    modalQuizBody.innerHTML = `<tr><td colspan="3" style="padding:4rem; text-align:center; color:var(--text-gray); font-weight:500;">No assessments taken yet.</td></tr>`;
+                }
+
+            } catch (err) {
+                console.warn("User stats fetch failed. User might not be logged in.", err);
+                // Optionally redirect to login if stats fail
+            }
+        });
+
+        function openAssessmentsModal() {
+            document.getElementById('assessments-modal').style.display = 'flex';
+        }
+
+        function closeAssessmentsModal() {
+            document.getElementById('assessments-modal').style.display = 'none';
+        }
+        
+        function openProgressModal() {
+            document.getElementById('progress-modal').style.display = 'flex';
+        }
+
+        function closeProgressModal() {
+            document.getElementById('progress-modal').style.display = 'none';
+        }
+
+        function openStreakModal() {
+            document.getElementById('streak-modal').style.display = 'flex';
+        }
+
+        function closeStreakModal() {
+            document.getElementById('streak-modal').style.display = 'none';
+        }
+
+        async function generateCustomPath() {
+            const goal = document.getElementById('goal-input').value.trim();
+            const language = document.getElementById('goal-lang').value;
+            if (!goal) return alert("What's your goal?");
+
+            document.getElementById('loader').style.display = 'flex';
+
+            try {
+                const data = await apiClient.request('/api/custom_roadmap', {
+                    method: 'POST',
+                    body: JSON.stringify({ goal, language })
+                });
+
+                if (!data || (!data.beginner && !data.intermediate)) throw new Error("Invalid response");
+
+                localStorage.setItem('custom_roadmap', JSON.stringify(data));
+                window.location.href = `tutor.html?lang=${language}&topic=custom`;
+            } catch (e) {
+                document.getElementById('loader').style.display = 'none';
+                alert("Could not generate roadmap. Try a simpler goal.");
+            }
+        }
+    </script>
+</body>
+
+</html>
