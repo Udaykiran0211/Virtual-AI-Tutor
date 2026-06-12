@@ -476,7 +476,7 @@
         let topic_id = "{{ topic_id }}";
 
         // Fallback for static server hosting (e.g. Live Server)
-        if (language.startsWith("{{") || !language) {
+        if (language.startsWith("{" + "{") || !language) {
             const urlParams = new URLSearchParams(window.location.search);
             language = urlParams.get('lang') || 'python';
             topic_id = urlParams.get('topic') || 'start';
