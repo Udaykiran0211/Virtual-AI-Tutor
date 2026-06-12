@@ -5,7 +5,9 @@
  */
 class ResilientAPIClient {
     constructor(baseUrl = '') {
-        this.baseUrl = baseUrl || (window.location.port !== '5000' ? 'http://127.0.0.1:5000' : '');
+        const isLocal = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+        const isLiveServer = window.location.port !== '5000' && window.location.port !== '';
+        this.baseUrl = baseUrl || ((isLocal && isLiveServer) ? 'http://127.0.0.1:5000' : '');
         this.status = 'disconnected'; 
         this.isAuthenticated = false; // New: track authentication state
         this.listeners = [];

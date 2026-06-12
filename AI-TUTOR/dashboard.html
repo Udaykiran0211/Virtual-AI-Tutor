@@ -626,21 +626,23 @@
 
                 // Update Lessons Table
                 const tbody = document.getElementById('recent-lessons-body');
-                if (data.recent_lessons && data.recent_lessons.length > 0) {
-                    tbody.innerHTML = data.recent_lessons.map(lesson => `
-                        <tr style="background:#F8F9FD; border-radius:16px;">
-                            <td style="padding:1.5rem 1rem; font-weight:700; border-radius:16px 0 0 16px;">${lesson.topic_id}</td>
-                            <td style="padding:1.5rem 1rem;"><span style="color:var(--primary-purple); font-weight:800; font-size:0.8rem;">${lesson.language.toUpperCase()}</span></td>
-                            <td style="padding:1.5rem 1rem;">
-                                ${lesson.completed ? '<span style="color:#32A096; font-weight:700;">✓ Done</span>' : '<span style="color:var(--text-gray); font-weight:600;">Processing</span>'}
-                            </td>
-                            <td style="padding:1.5rem 1rem; text-align:right; border-radius:0 16px 16px 0;">
-                                <a href="tutor.html?lang=${lesson.language}&topic=${lesson.topic_id}" style="color:var(--primary-purple); font-weight:800; text-decoration:none; font-size:0.9rem;">Resume</a>
-                            </td>
-                        </tr>
-                    `).join('');
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="4" style="padding:4rem; text-align:center; color:var(--text-gray); font-weight:500;">No activity yet. Start your first lesson!</td></tr>`;
+                if (tbody) {
+                    if (data.recent_lessons && data.recent_lessons.length > 0) {
+                        tbody.innerHTML = data.recent_lessons.map(lesson => `
+                            <tr style="background:#F8F9FD; border-radius:16px;">
+                                <td style="padding:1.5rem 1rem; font-weight:700; border-radius:16px 0 0 16px;">${lesson.topic_id}</td>
+                                <td style="padding:1.5rem 1rem;"><span style="color:var(--primary-purple); font-weight:800; font-size:0.8rem;">${lesson.language.toUpperCase()}</span></td>
+                                <td style="padding:1.5rem 1rem;">
+                                    ${lesson.completed ? '<span style="color:#32A096; font-weight:700;">✓ Done</span>' : '<span style="color:var(--text-gray); font-weight:600;">Processing</span>'}
+                                </td>
+                                <td style="padding:1.5rem 1rem; text-align:right; border-radius:0 16px 16px 0;">
+                                    <a href="tutor.html?lang=${lesson.language}&topic=${lesson.topic_id}" style="color:var(--primary-purple); font-weight:800; text-decoration:none; font-size:0.9rem;">Resume</a>
+                                </td>
+                            </tr>
+                        `).join('');
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="4" style="padding:4rem; text-align:center; color:var(--text-gray); font-weight:500;">No activity yet. Start your first lesson!</td></tr>`;
+                    }
                 }
 
                 // Update Quiz History

@@ -122,7 +122,7 @@ def submit_quiz():
         db.session.add(prog)
     
     prog.completed = True
-    if score > prog.score:
+    if prog.score is None or score > prog.score:
         prog.score = score
         
     badges = json.loads(current_user.badges) if current_user.badges else []

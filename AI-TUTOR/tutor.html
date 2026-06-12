@@ -472,9 +472,16 @@
 
     <script>
         if(window.marked) marked.setOptions({ hook: null, breaks: true });
-        const urlParams = new URLSearchParams(window.location.search);
-        const language = urlParams.get('lang') || 'python';
-        const topic_id = urlParams.get('topic') || 'start';
+        let language = "{{ language }}";
+        let topic_id = "{{ topic_id }}";
+
+        // Fallback for static server hosting (e.g. Live Server)
+        if (language.startsWith("{{") || !language) {
+            const urlParams = new URLSearchParams(window.location.search);
+            language = urlParams.get('lang') || 'python';
+            topic_id = urlParams.get('topic') || 'start';
+        }
+
 
         let activeNode = null;
         let chatHistory = [];
@@ -671,7 +678,6 @@
                     </div>
                 </div>`;
             });
-            html += `<div style="display:flex; justify-content:center;"><button class="btn btn-primary" style="padding:1.4rem 4rem;" onclick="submitQuiz()">Submit Assessment</button></div></div>`;
             box.innerHTML = html;
         }
 
@@ -693,75 +699,64 @@
             const total = currentQuiz.length;
             const percentage = Math.round((score / total) * 100);
 
-            // Display loading results
-            document.getElementById('ai-quiz-content').innerHTML = `
-                <div style="text-align:center; padding:3rem;" class="animate-fade">
-                    <div class="spinner" style="margin:0 auto 2rem;"></div>
-                    <h3>Calculating your score...</h3>
+            // Final results display with detailed feedback (Rendered instantly)
+            let feedbackHtml = `
+                <div style="text-align:center; padding:3rem; margin-bottom:3rem;" class="glass-card animate-fade">
+                    <div style="font-size:4rem; margin-bottom:1rem;">${percentage >= 70 ? '🎉' : '📚'}</div>
+                    <h2 style="font-size:2.5rem; font-weight:800; margin-bottom:0.5rem;">Score: ${percentage}%</h2>
+                    <p style="color:var(--text-muted); margin-bottom:1.5rem;">You got ${score} out of ${total} correct.</p>
+                    <div style="display:flex; gap:1rem; justify-content:center;">
+                         <button class="btn btn-primary btn-sm" onclick="generateQuiz()">Try Again</button>
+                         ${percentage < 100 ? `<button class="btn btn-primary btn-sm" style="background:#ff9f2d;" onclick="reviewQuiz()">AI Review</button>` : ''}
+                         <a href="dashboard.html" class="btn btn-glass btn-sm" style="text-decoration:none;">Finish</a>
+                    </div>
                 </div>
+                <div style="display:flex; flex-direction:column; gap:2rem;">
             `;
 
-            try {
-                await apiClient.request('/api/quiz/submit', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        topic_id: activeNode.id || activeNode.topic,
-                        language: language,
-                        score: score,
-                        total_questions: total
-                    })
-                });
+            results.forEach((r, i) => {
+                const q = r.question;
+                const formattedQuestion = q.question.replace(/```(python|javascript|js|json)?\n?([\s\S]*?)```/g, '<pre style="background:rgba(0,0,0,0.3); padding:1rem; border-radius:8px; margin:1rem 0; overflow-x:auto;"><code>$2</code></pre>');
 
-                // Final results display with detailed feedback
-                let feedbackHtml = `
-                    <div style="text-align:center; padding:3rem; margin-bottom:3rem;" class="glass-card animate-fade">
-                        <div style="font-size:4rem; margin-bottom:1rem;">${percentage >= 70 ? '🎉' : '📚'}</div>
-                        <h2 style="font-size:2.5rem; font-weight:800; margin-bottom:0.5rem;">Score: ${percentage}%</h2>
-                        <p style="color:var(--text-muted); margin-bottom:1.5rem;">You got ${score} out of ${total} correct.</p>
-                        <div style="display:flex; gap:1rem; justify-content:center;">
-                             <button class="btn btn-primary btn-sm" onclick="generateQuiz()">Try Again</button>
-                             ${percentage < 100 ? `<button class="btn btn-primary btn-sm" style="background:#ff9f2d;" onclick="reviewQuiz()">AI Review</button>` : ''}
-                             <a href="dashboard.html" class="btn btn-glass btn-sm" style="text-decoration:none;">Finish</a>
+                feedbackHtml += `
+                    <div class="glass-card" style="border-left: 6px solid ${r.isCorrect ? '#4ade80' : '#f87171'}">
+                        <p style="margin-bottom:1rem; font-weight:800;">Q${i + 1}: ${formattedQuestion}</p>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
+                            ${q.options.map((opt, oi) => {
+                                let style = "opacity: 0.7;";
+                                let icon = "";
+                                if (oi === q.answer) {
+                                    style = "color: #4ade80; font-weight:700;";
+                                    icon = "✅ ";
+                                } else if (oi === r.selected) {
+                                    style = "color: #f87171; font-weight:700; text-decoration: line-through;";
+                                    icon = "❌ ";
+                                }
+                                return `<div style="${style}">${icon}${opt}</div>`;
+                            }).join('')}
+                        </div>
+                        <div style="background:rgba(255,255,255,0.05); padding:1rem; border-radius:8px; font-size:0.9rem;">
+                            <strong>Explanation:</strong> ${q.explanation || 'No detail provided.'}
                         </div>
                     </div>
-                    <div style="display:flex; flex-direction:column; gap:2rem;">
                 `;
+            });
 
-                results.forEach((r, i) => {
-                    const q = r.question;
-                    const formattedQuestion = q.question.replace(/```(python|javascript|js|json)?\n?([\s\S]*?)```/g, '<pre style="background:rgba(0,0,0,0.3); padding:1rem; border-radius:8px; margin:1rem 0; overflow-x:auto;"><code>$2</code></pre>');
+            feedbackHtml += '</div>';
+            document.getElementById('ai-quiz-content').innerHTML = feedbackHtml;
 
-                    feedbackHtml += `
-                        <div class="glass-card" style="border-left: 6px solid ${r.isCorrect ? '#4ade80' : '#f87171'}">
-                            <p style="margin-bottom:1rem; font-weight:800;">Q${i + 1}: ${formattedQuestion}</p>
-                            <div style="display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1rem;">
-                                ${q.options.map((opt, oi) => {
-                        let style = "opacity: 0.7;";
-                        let icon = "";
-                        if (oi === q.answer) {
-                            style = "color: #4ade80; font-weight:700;";
-                            icon = "✅ ";
-                        } else if (oi === r.selected) {
-                            style = "color: #f87171; font-weight:700; text-decoration: line-through;";
-                            icon = "❌ ";
-                        }
-                        return `<div style="${style}">${icon}${opt}</div>`;
-                    }).join('')}
-                            </div>
-                            <div style="background:rgba(255,255,255,0.05); padding:1rem; border-radius:8px; font-size:0.9rem;">
-                                <strong>Explanation:</strong> ${q.explanation || 'No detail provided.'}
-                            </div>
-                        </div>
-                    `;
-                });
-
-                feedbackHtml += '</div>';
-                document.getElementById('ai-quiz-content').innerHTML = feedbackHtml;
-
-            } catch (err) {
-                console.error(err);
-                alert("Failed to save results. Check your connection.");
-            }
+            // Submit asynchronously in the background
+            apiClient.request('/api/quiz/submit', {
+                method: 'POST',
+                body: JSON.stringify({
+                    topic_id: activeNode.id || activeNode.topic,
+                    language: language,
+                    score: score,
+                    total_questions: total
+                })
+            }).catch(err => {
+                console.error("[Quiz Submit] Failed to save quiz score asynchronously:", err);
+            });
         }
 
         async function saveWorkspace() {

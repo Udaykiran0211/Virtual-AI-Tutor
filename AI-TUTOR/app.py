@@ -34,7 +34,8 @@ def create_app(config_class=Config):
         if request.path.startswith('/static') or request.path == '/favicon.ico':
             return
             
-        if not current_user.is_authenticated:
+        is_local = (request.host.startswith('127.0.0.1') or request.host.startswith('localhost')) and not os.environ.get('RENDER')
+        if is_local and not current_user.is_authenticated:
             try:
                 user = User.query.filter_by(username='Student').first()
                 if not user:
@@ -47,6 +48,7 @@ def create_app(config_class=Config):
                 
             if user:
                 login_user(user, remember=True)
+
 
     @login_manager.user_loader
 
