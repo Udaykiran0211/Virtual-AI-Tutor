@@ -110,7 +110,7 @@
 
                 if (isLocalStatic && isLiveServer && !isBackendUp) {
                     console.log('[Auth] Backend disconnected. Redirecting to login (Static Mode).');
-                    alert('Static Mode: Redirecting to login. Any username/password will work.');
+                    await customAlert('Static Mode: Redirecting to login. Any username/password will work.', 'Static Mode');
                     window.location.href = 'login.html';
                     return;
                 }
@@ -121,17 +121,17 @@
                 });
 
                 if (response && response.status === 'success') {
-                    alert('Account created! Please sign in.');
+                    await customAlert('Account created! Please sign in.', 'Success');
                     window.location.href = 'login.html';
                 } else {
-                    alert(response.message || 'Signup failed');
+                    await customAlert(response.message || 'Signup failed', 'Signup Error');
                 }
             } catch (err) {
                 console.error('Signup error:', err);
                 if (isLocalStatic && isLiveServer) {
                     window.location.href = 'login.html';
                 } else {
-                    alert('Could not connect to the backend. Is python app.py running?');
+                    await customAlert('Could not connect to the backend. Is python app.py running?', 'Connection Error');
                 }
             }
         });

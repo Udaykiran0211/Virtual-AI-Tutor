@@ -123,7 +123,7 @@
                 if (response && response.status === 'success') {
                     window.location.href = response.redirect || 'dashboard.html';
                 } else {
-                    alert(response.message || 'Login failed');
+                    await customAlert(response.message || 'Login failed', 'Login Error');
                 }
             } catch (err) {
                 console.error('Login error:', err);
@@ -131,7 +131,7 @@
                     console.log('[Auth] Connection failure. Redirecting to dashboard (Static Mode).');
                     window.location.href = 'dashboard.html';
                 } else {
-                    alert('Could not connect to the backend. Is python app.py running?');
+                    await customAlert('Could not connect to the backend. Is python app.py running?', 'Connection Error');
                 }
             }
         });

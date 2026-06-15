@@ -537,3 +537,147 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+// ==========================================
+// Custom Premium Notifications (Toast & Modal)
+// ==========================================
+
+function injectNotificationContainers() {
+    if (!document.getElementById('custom-toast-container')) {
+        const container = document.createElement('div');
+        container.id = 'custom-toast-container';
+        document.body.appendChild(container);
+    }
+}
+
+window.showToast = function(message, type = 'info', duration = 4000) {
+    injectNotificationContainers();
+    const container = document.getElementById('custom-toast-container');
+    
+    const toast = document.createElement('div');
+    toast.className = `custom-toast toast-${type} animate-slide-in`;
+    
+    let icon = 'ℹ️';
+    if (type === 'success') icon = '✅';
+    if (type === 'error') icon = '❌';
+    if (type === 'warning') icon = '⚠️';
+    
+    toast.innerHTML = `
+        <span class="toast-icon">${icon}</span>
+        <span class="toast-message">${message}</span>
+        <button class="toast-close-btn" aria-label="Close">&times;</button>
+    `;
+    
+    container.appendChild(toast);
+    
+    const removeToast = () => {
+        toast.classList.remove('animate-slide-in');
+        toast.classList.add('animate-slide-out');
+        const handleAnimationEnd = () => {
+            toast.remove();
+            toast.removeEventListener('animationend', handleAnimationEnd);
+        };
+        toast.addEventListener('animationend', handleAnimationEnd);
+    };
+    
+    const timeoutId = setTimeout(removeToast, duration);
+    
+    toast.querySelector('.toast-close-btn').addEventListener('click', () => {
+        clearTimeout(timeoutId);
+        removeToast();
+    });
+};
+
+window.customAlert = function(message, title = 'Notification') {
+    return new Promise((resolve) => {
+        // Remove existing custom modal if any
+        const existing = document.getElementById('custom-alert-modal');
+        if (existing) {
+            existing.remove();
+        }
+        
+        const modal = document.createElement('div');
+        modal.id = 'custom-alert-modal';
+        modal.className = 'custom-alert-overlay animate-fade-in';
+        
+        // Auto-detect status icon/color based on keywords
+        let iconEmoji = '✨';
+        const lowerMsg = message.toLowerCase();
+        if (lowerMsg.includes('success') || lowerMsg.includes('created') || lowerMsg.includes('saved')) {
+            iconEmoji = '✅';
+            if (title === 'Notification') title = 'Success';
+        } else if (lowerMsg.includes('fail') || lowerMsg.includes('error') || lowerMsg.includes('could not') || lowerMsg.includes('offline')) {
+            iconEmoji = '❌';
+            if (title === 'Notification') title = 'Error';
+        } else if (lowerMsg.includes('warning') || lowerMsg.includes('attention')) {
+            iconEmoji = '⚠️';
+            if (title === 'Notification') title = 'Warning';
+        }
+        
+        modal.innerHTML = `
+            <div class="custom-alert-card glass-card animate-scale-in">
+                <div class="custom-alert-header">
+                    <div class="logo-icon">${iconEmoji}</div>
+                    <h3>${title}</h3>
+                </div>
+                <div class="custom-alert-body">
+                    <p>${message}</p>
+                </div>
+                <div class="custom-alert-footer">
+                    <button class="btn btn-primary" id="custom-alert-ok-btn">OK</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Disable page scroll
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        
+        const close = () => {
+            modal.classList.remove('animate-fade-in');
+            modal.classList.add('animate-fade-out');
+            
+            const card = modal.querySelector('.custom-alert-card');
+            if (card) {
+                card.classList.remove('animate-scale-in');
+                card.classList.add('animate-scale-out');
+            }
+            
+            const handleAnimationEnd = () => {
+                modal.remove();
+                document.body.style.overflow = originalOverflow;
+                modal.removeEventListener('animationend', handleAnimationEnd);
+                resolve();
+            };
+            modal.addEventListener('animationend', handleAnimationEnd);
+        };
+        
+        modal.querySelector('#custom-alert-ok-btn').focus();
+        modal.querySelector('#custom-alert-ok-btn').addEventListener('click', close);
+        
+        // Close on overlay click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                close();
+            }
+        });
+        
+        // Also support Enter/Escape key press to close
+        const handleKeyDown = (e) => {
+            if (e.key === 'Enter' || e.key === 'Escape') {
+                e.preventDefault();
+                document.removeEventListener('keydown', handleKeyDown);
+                close();
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+    });
+};
+
+// Override default window.alert
+window.alert = function(message) {
+    if (message === undefined || message === null) return Promise.resolve();
+    return window.customAlert(String(message));
+};

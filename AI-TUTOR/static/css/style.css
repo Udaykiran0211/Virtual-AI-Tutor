@@ -578,3 +578,239 @@ input:-webkit-autofill:focus {
         text-align: center;
     }
 }
+
+/* ==========================================
+   Custom Premium Notifications (Toast & Modal)
+   ========================================== */
+
+/* Toast Container & Toasts */
+#custom-toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 380px;
+    width: calc(100% - 48px);
+    pointer-events: none;
+}
+
+.custom-toast {
+    pointer-events: auto;
+    background: rgba(20, 24, 33, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    color: var(--text-main);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-toast::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+}
+
+/* Toast types colors & glows */
+.toast-success::before { background: var(--accent-cyan); }
+.toast-success { border-color: rgba(0, 223, 216, 0.3); box-shadow: 0 8px 25px rgba(0, 223, 216, 0.15), 0 10px 30px rgba(0, 0, 0, 0.4); }
+
+.toast-error::before { background: #ff4b4b; }
+.toast-error { border-color: rgba(255, 75, 75, 0.3); box-shadow: 0 8px 25px rgba(255, 75, 75, 0.15), 0 10px 30px rgba(0, 0, 0, 0.4); }
+
+.toast-warning::before { background: #ffca28; }
+.toast-warning { border-color: rgba(255, 202, 40, 0.3); box-shadow: 0 8px 25px rgba(255, 202, 40, 0.15), 0 10px 30px rgba(0, 0, 0, 0.4); }
+
+.toast-info::before { background: var(--primary-purple); }
+.toast-info { border-color: rgba(108, 93, 211, 0.3); box-shadow: 0 8px 25px rgba(108, 93, 211, 0.15), 0 10px 30px rgba(0, 0, 0, 0.4); }
+
+.toast-icon {
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.toast-message {
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.4;
+    flex-grow: 1;
+}
+
+.toast-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.toast-close-btn:hover {
+    color: white;
+}
+
+/* Animations for Toast */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(50px) scale(0.9);
+    }
+}
+
+.animate-slide-in {
+    animation: slideInRight 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-slide-out {
+    animation: slideOutRight 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+}
+
+
+/* Custom Alert Modal Overlay */
+.custom-alert-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(5, 7, 11, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    transition: opacity 0.3s ease;
+}
+
+/* Alert Dialog Card */
+.custom-alert-card {
+    width: 100%;
+    max-width: 440px;
+    background: rgba(18, 22, 30, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 2.2rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(108, 93, 211, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.custom-alert-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.custom-alert-header .logo-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.custom-alert-header h3 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: white;
+    letter-spacing: -0.5px;
+}
+
+.custom-alert-body {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    line-height: 1.5;
+}
+
+.custom-alert-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+}
+
+.custom-alert-footer .btn {
+    padding: 0.75rem 2rem;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+/* Modal Animations */
+@keyframes fadeInOverlay {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOutOverlay {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes scaleInModal {
+    from { transform: scale(0.9) translateY(15px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+@keyframes scaleOutModal {
+    from { transform: scale(1) translateY(0); opacity: 1; }
+    to { transform: scale(0.9) translateY(15px); opacity: 0; }
+}
+
+.custom-alert-overlay.animate-fade-in {
+    animation: fadeInOverlay 0.25s ease forwards;
+}
+
+.custom-alert-overlay.animate-fade-out {
+    animation: fadeOutOverlay 0.25s ease forwards;
+}
+
+.custom-alert-card.animate-scale-in {
+    animation: scaleInModal 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.custom-alert-card.animate-scale-out {
+    animation: scaleOutModal 0.25s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
+}

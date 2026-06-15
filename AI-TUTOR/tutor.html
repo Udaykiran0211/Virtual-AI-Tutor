@@ -678,6 +678,11 @@
                     </div>
                 </div>`;
             });
+            // Add Submit Quiz button at the bottom
+            html += `<div style="display:flex; justify-content:flex-end; margin-top:2rem;">
+                <button class="btn btn-primary" onclick="submitQuiz()">Submit Quiz</button>
+            </div>`;
+            html += '</div>';
             box.innerHTML = html;
         }
 
